@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tecnomonte - Almoxarifado Industrial</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <!-- Chart.js para Relatórios Analíticos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            tecnomonte: {
+              blue: '#004182',
+              gold: '#C5A059',
+              dark: '#002a54',
+              light: '#f1f5f9'
+            },
+            primary: {
+              500: '#004182',
+              600: '#00356b',
+              700: '#002a54',
+            }
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      background-color: #f8fafc;
+    }
+
+    .dark body {
+      background-color: #0f172a;
+    }
+
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #004182 0%, #001a35 100%);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-container::before {
+      content: "";
+      position: absolute;
+      width: 150%;
+      height: 150%;
+      background: radial-gradient(circle, rgba(197, 160, 89, 0.05) 0%, transparent 70%);
+      top: -25%;
+      left: -25%;
+      pointer-events: none;
+    }
+
+    .login-box {
+      background: white;
+      padding: 40px;
+      border-radius: 4px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 420px;
+      border-top: 5px solid #C5A059;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 10;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tank-icon {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 20px;
+      background: #004182;
+      border-radius: 12px 12px 0 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 15px solid #C5A059;
+    }
+
+    .btn-tecnomonte {
+      background-color: #004182;
+      transition: all 0.3s;
+    }
+
+    .btn-tecnomonte:hover {
+      background-color: #00356b;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 65, 130, 0.3);
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      .print-only {
+        display: block !important;
+      }
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.32.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <!-- Integração Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/supabase-integration.js"></script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>

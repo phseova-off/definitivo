@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tecnomonte - Integração Vanilla JS</title>
+
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #004182;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status-indicator.online {
+            background: #10b981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+        }
+
+        .status-indicator.offline {
+            background: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #004182;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 65, 130, 0.4);
+            background: #003366;
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: #6b7280;
+        }
+
+        button.secondary:hover {
+            background: #4b5563;
+        }
+
+        button.danger {
+            background: #ef4444;
+        }
+
+        button.danger:hover {
+            background: #dc2626;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #004182;
+        }
+
+        .data-display {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .data-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-left: 4px solid #004182;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-success {
+            background: #10b981;
+        }
+
+        .notification-error {
+            background: #ef4444;
+        }
+
+        .notification-warning {
+            background: #f59e0b;
+        }
+
+        .notification-info {
+            background: #3b82f6;
+        }
+
+        .login-section {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        pre {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            background: none;
+            color: #6b7280;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            color: #004182;
+            border-bottom-color: #004182;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Seção de Login -->
+    <div id="loginSection" class="login-section">
+        <h1 style="text-align: center; margin-bottom: 30px;">🏭 Tecnomonte</h1>
+
+        <div class="form-group">
+            <label>Usuário</label>
+            <input type="text" id="loginUser" placeholder="Digite seu usuário">
+        </div>
+
+        <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="loginPassword" placeholder="Digite sua senha">
+        </div>
+
+        <button onclick="realizarLogin()" style="width: 100%; margin-top: 20px;">
+            Entrar
+        </button>
+
+        <p style="text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px;">
+            Funciona online e offline!
+        </p>
+    </div>
+
+    <!-- Aplicação Principal -->
+    <div id="appSection" class="container hidden">
+        <h1>🏭 Tecnomonte - Almoxarifado Inteligente</h1>
+        <p style="color: #6b7280; margin-bottom: 20px;">Integração JavaScript com Supabase + IndexedDB</p>
+
+        <!-- Barra de Status -->
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="statusText">Verificando...</span>
+            </div>
+
+            <div class="status-item">
+                <strong>Usuário:</strong>
+                <span id="currentUser">-</span>
+            </div>
+
+            <div class="status-item">
+                <strong>Itens na fila:</strong>
+                <span id="queueCount">0</span>
+            </div>
+
+            <div style="margin-left: auto;">
+                <button onclick="sincronizar()" class="secondary">🔄 Sincronizar</button>
+                <button onclick="realizarLogout()" class="danger">Sair</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="abrirTab('produtos')">Produtos</button>
+            <button class="tab-button" onclick="abrirTab('movimentacoes')">Movimentações</button>
+            <button class="tab-button" onclick="abrirTab('colaboradores')">Colaboradores</button>
+            <button class="tab-button" onclick="abrirTab('config')">Configuração</button>
+        </div>
+
+        <!-- Tab: Produtos -->
+        <div id="produtosTab" class="tab-content active">
+            <div class="button-group">
+                <button onclick="carregarProdutos()">📦 Carregar Produtos</button>
+                <button onclick="mostrarFormProduto()">➕ Adicionar Produto</button>
+            </div>
+
+            <!-- Formulário de Produto -->
+            <div id="formProduto" class="hidden"
+                style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-bottom: 15px;">Novo Produto</h3>
+
+                <div class="form-group">
+                    <label>Nome do Produto*</label>
+                    <input type="text" id="produtoNome" placeholder="Ex: Capacete de Segurança">
+                </div>
+
+                <div class="form-group">
+                    <label>Categoria*</label>
+                    <select id="produtoCategoria">
+                        <option value="">Selecione...</option>
+                        <option value="EPIs">EPIs</option>
+                        <option value="Ferramentas">Ferramentas</option>
+                        <option value="Equipamentos">Equipamentos</option>
+                        <option value="Consumíveis">Consumíveis</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Unidade de Medida*</label>
+                    <select id="produtoUnidade">
+                        <option value="UN">Unidade (UN)</option>
+                        <option value="CX">Caixa (CX)</option>
+                        <option value="KG">Quilograma (KG)</option>
+                        <option value="MT">Metro (MT)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Quantidade Inicial</label>
+                    <input type="number" id="produtoQuantidade" value="0" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Estoque Mínimo</label>
+                    <input type="number" id="produtoEstoqueMinimo" value="0" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Localização</label>
+                    <input type="text" id="produtoLocalizacao" placeholder="Ex: Prateleira A3">
+                </div>
+
+                <div class="button-group">
+                    <button onclick="salvarProduto()">💾 Salvar Produto</button>
+                    <button onclick="cancelarFormProduto()" class="secondary">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Lista de Produtos -->
+            <div id="produtosLista" class="data-display">
+                <p style="text-align: center; color: #6b7280;">Clique em "Carregar Produtos" para visualizar</p>
+            </div>
+        </div>
+
+        <!-- Tab: Movimentações -->
+        <div id="movimentacoesTab" class="tab-content">
+            <div class="button-group">
+                <button onclick="carregarMovimentacoes()">📋 Carregar Movimentações</button>
+                <button onclick="mostrarFormMovimentacao()">➕ Nova Movimentação</button>
+            </div>
+
+            <!-- Lista de Movimentações -->
+            <div id="movimentacoesLista" class="data-display">
+                <p style="text-align: center; color: #6b7280;">Clique em "Carregar Movimentações" para visualizar</p>
+            </div>
+        </div>
+
+        <!-- Tab: Colaboradores -->
+        <div id="colaboradoresTab" class="tab-content">
+            <div class="button-group">
+                <button onclick="carregarColaboradores()">👥 Carregar Colaboradores</button>
+            </div>
+
+            <!-- Lista de Colaboradores -->
+            <div id="colaboradoresLista" class="data-display">
+                <p style="text-align: center; color: #6b7280;">Clique em "Carregar Colaboradores" para visualizar</p>
+            </div>
+        </div>
+
+        <!-- Tab: Configuração -->
+        <div id="configTab" class="tab-content">
+            <h3>Configuração do Supabase</h3>
+
+            <div class="form-group">
+                <label>Supabase URL</label>
+                <input type="text" id="configUrl" placeholder="https://xxx.supabase.co">
+            </div>
+
+            <div class="form-group">
+                <label>Supabase Anon Key</label>
+                <input type="password" id="configKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+            </div>
+
+            <button onclick="salvarConfiguracao()">💾 Salvar Configuração</button>
+            <button onclick="testarConexao()" class="secondary">🔌 Testar Conexão</button>
+        </div>
+    </div>
+
+    <!-- Script de Integração -->
+    <script src="supabase-integration.js"></script>
+
+    <!-- Scripts da Aplicação -->
+    <script>
+        // ========================================
+        // GLOBAL STATE
+        // ========================================
+
+        let produtos = [];
+        let movimentacoes = [];
+        let colaboradores = [];
+
+        // ========================================
+        // INICIALIZAÇÃO CUSTOMIZADA
+        // ========================================
+
+        // Sobrescrever funções de UI
+        window.mostrarTelaLogin = function () {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('appSection').classList.add('hidden');
+        }
+
+        window.renderizarApp = function () {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('appSection').classList.remove('hidden');
+
+            // Atualizar UI
+            atualizarStatusBar();
+            carregarConfiguracao();
+        }
+
+        // ========================================
+        // STATUS BAR
+        // ========================================
+
+        function atualizarStatusBar() {
+            const indicator = document.getElementById('statusIndicator');
+            const text = document.getElementById('statusText');
+            const userSpan = document.getElementById('currentUser');
+
+            if (TecnomonteApp.modoOffline) {
+                indicator.className = 'status-indicator offline';
+                text.textContent = 'Offline';
+            } else {
+                indicator.className = 'status-indicator online';
+                text.textContent = 'Online';
+            }
+
+            if (TecnomonteApp.usuarioLogado) {
+                userSpan.textContent = TecnomonteApp.usuarioLogado.nome || TecnomonteApp.usuarioLogado.usuario;
+            }
+        }
+
+        // Atualizar a cada 2 segundos
+        setInterval(atualizarStatusBar, 2000);
+
+        // ========================================
+        // AUTENTICAÇÃO
+        // ========================================
+
+        async function realizarLogin() {
+            const usuario = document.getElementById('loginUser').value;
+            const senha = document.getElementById('loginPassword').value;
+
+            if (!usuario || !senha) {
+                alert('Preencha usuário e senha');
+                return;
+            }
+
+            const result = await TecnomonteApp.fazerLogin(usuario, senha);
+
+            if (result.success) {
+                renderizarApp();
+            } else {
+                alert(result.error || 'Erro ao fazer login');
+            }
+        }
+
+        async function realizarLogout() {
+            await TecnomonteApp.fazerLogout();
+        }
+
+        // ========================================
+        // SINCRONIZAÇÃO
+        // ========================================
+
+        async function sincronizar() {
+            await TecnomonteApp.sincronizarDados();
+            atualizarStatusBar();
+        }
+
+        // ========================================
+        // TABS
+        // ========================================
+
+        function abrirTab(tabName) {
+            // Remover active de todos os botões e conteúdos
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Adicionar active ao selecionado
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // ========================================
+        // PRODUTOS
+        // ========================================
+
+        async function carregarProdutos() {
+            produtos = await TecnomonteApp.listarProdutos();
+
+            const lista = document.getElementById('produtosLista');
+
+            if (produtos.length === 0) {
+                lista.innerHTML = '<p style="text-align: center; color: #6b7280;">Nenhum produto cadastrado</p>';
+                return;
+            }
+
+            lista.innerHTML = produtos.map(p => `
+        <div class="data-item">
+          <strong style="font-size: 16px; color: #004182;">${p.nome}</strong>
+          <div style="margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 14px; color: #6b7280;">
+            <div><strong>SKU:</strong> ${p.sku || '-'}</div>
+            <div><strong>Categoria:</strong> ${p.categoria}</div>
+            <div><strong>Quantidade:</strong> ${p.quantidade || 0} ${p.unidade_medida || 'UN'}</div>
+            <div><strong>Localização:</strong> ${p.localizacao || '-'}</div>
+          </div>
+        </div>
+      `).join('');
+        }
+
+        function mostrarFormProduto() {
+            document.getElementById('formProduto').classList.remove('hidden');
+        }
+
+        function cancelarFormProduto() {
+            document.getElementById('formProduto').classList.add('hidden');
+            limparFormProduto();
+        }
+
+        function limparFormProduto() {
+            document.getElementById('produtoNome').value = '';
+            document.getElementById('produtoCategoria').value = '';
+            document.getElementById('produtoUnidade').value = 'UN';
+            document.getElementById('produtoQuantidade').value = '0';
+            document.getElementById('produtoEstoqueMinimo').value = '0';
+            document.getElementById('produtoLocalizacao').value = '';
+        }
+
+        async function salvarProduto() {
+            const produto = {
+                nome: document.getElementById('produtoNome').value,
+                categoria: document.getElementById('produtoCategoria').value,
+                unidade_medida: document.getElementById('produtoUnidade').value,
+                quantidade: parseInt(document.getElementById('produtoQuantidade').value) || 0,
+                estoque_minimo: parseInt(document.getElementById('produtoEstoqueMinimo').value) || 0,
+                localizacao: document.getElementById('produtoLocalizacao').value
+            };
+
+            if (!produto.nome || !produto.categoria) {
+                alert('Preencha os campos obrigatórios');
+                return;
+            }
+
+            const result = await TecnomonteApp.adicionarProduto(produto);
+
+            if (result.success) {
+                cancelarFormProduto();
+                carregarProdutos();
+            } else {
+                alert('Erro ao salvar produto: ' + result.error);
+            }
+        }
+
+        // ========================================
+        // MOVIMENTAÇÕES
+        // ========================================
+
+        async function carregarMovimentacoes() {
+            movimentacoes = await TecnomonteApp.listarMovimentacoes(100);
+
+            const lista = document.getElementById('movimentacoesLista');
+
+            if (movimentacoes.length === 0) {
+                lista.innerHTML = '<p style="text-align: center; color: #6b7280;">Nenhuma movimentação registrada</p>';
+                return;
+            }
+
+            lista.innerHTML = movimentacoes.map(m => {
+                const tipo = m.tipo_movimentacao || 'N/A';
+                const cor = tipo === 'entrada' ? '#10b981' : tipo === 'saida' ? '#ef4444' : '#6b7280';
+
+                return `
+          <div class="data-item" style="border-left-color: ${cor};">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+              <div>
+                <strong style="font-size: 16px; color: ${cor}; text-transform: uppercase;">${tipo}</strong>
+                <div style="margin-top: 5px; color: #374151;">${m.nome_material || 'Produto'}</div>
+              </div>
+              <div style="text-align: right; font-size: 14px; color: #6b7280;">
+                ${new Date(m.data).toLocaleDateString('pt-BR')}
+              </div>
+            </div>
+            <div style="margin-top: 10px; font-size: 14px; color: #6b7280;">
+              <strong>Quantidade:</strong> ${m.quantidade} | 
+              <strong>Colaborador:</strong> ${m.nome_colaborador || '-'}
+            </div>
+          </div>
+        `;
+            }).join('');
+        }
+
+        // ========================================
+        // COLABORADORES
+        // ========================================
+
+        async function carregarColaboradores() {
+            colaboradores = await TecnomonteApp.listarColaboradores();
+
+            const lista = document.getElementById('colaboradoresLista');
+
+            if (colaboradores.length === 0) {
+                lista.innerHTML = '<p style="text-align: center; color: #6b7280;">Nenhum colaborador cadastrado</p>';
+                return;
+            }
+
+            lista.innerHTML = colaboradores.map(c => `
+        <div class="data-item">
+          <strong style="font-size: 16px; color: #004182;">${c.name}</strong>
+          <div style="margin-top: 8px; font-size: 14px; color: #6b7280;">
+            <strong>ID:</strong> ${c.id_fun} | 
+            <strong>Departamento:</strong> ${c.department || '-'} | 
+            <strong>Status:</strong> ${c.status || 'Ativo'}
+          </div>
+        </div>
+      `).join('');
+        }
+
+        // ========================================
+        // CONFIGURAÇÃO
+        // ========================================
+
+        function carregarConfiguracao() {
+            document.getElementById('configUrl').value = localStorage.getItem('supabase_url') || '';
+            document.getElementById('configKey').value = localStorage.getItem('supabase_anon_key') || '';
+        }
+
+        function salvarConfiguracao() {
+            const url = document.getElementById('configUrl').value;
+            const key = document.getElementById('configKey').value;
+
+            localStorage.setItem('supabase_url', url);
+            localStorage.setItem('supabase_anon_key', key);
+
+            alert('✅ Configuração salva! Recarregue a página para aplicar.');
+        }
+
+        async function testarConexao() {
+            // Implementar teste de conexão
+            alert('Funcionalidade em desenvolvimento');
+        }
+
+        // ========================================
+        // EVENTOS DE TECLADO
+        // ========================================
+
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const loginSection = document.getElementById('loginSection');
+                if (!loginSection.classList.contains('hidden')) {
+                    realizarLogin();
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
